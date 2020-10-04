@@ -1,4 +1,5 @@
 {
+    "name": "pfazzi/blockchain",
     "autoload": {
         "psr-4": {
             "Pfazzi\\Blockchain\\": "src"
