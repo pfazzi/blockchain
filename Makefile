@@ -1,5 +1,5 @@
 phpcbf:
-	./vendor/bin/phpcbf --standard=Doctrine src
+	./vendor/bin/phpcbf
 
 psalm:
 	./vendor/bin/psalm

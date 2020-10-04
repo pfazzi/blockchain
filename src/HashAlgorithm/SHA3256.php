@@ -2,7 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Pfazzi\Blockchain;
+namespace Pfazzi\Blockchain\HashAlgorithm;
+
+use Pfazzi\Blockchain\HashAlgorithm;
 
 use function hash;
 
