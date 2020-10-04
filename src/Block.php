@@ -1,9 +1,14 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Pfazzi\Blockchain;
 
 use JsonSerializable;
+
+use function json_encode;
+use function str_pad;
+use function substr;
 
 class Block implements JsonSerializable
 {
@@ -19,7 +24,7 @@ class Block implements JsonSerializable
      */
     public function __construct(HashAlgorithm $hashAlgorithm, int $timestamp, array $transactions, ?string $previousHash = null)
     {
-        $this->timestamp = $timestamp;
+        $this->timestamp    = $timestamp;
         $this->transactions = $transactions;
         $this->previousHash = $previousHash;
 
@@ -72,11 +77,11 @@ class Block implements JsonSerializable
     public function hasValidTransactions(SignatureVerifier $verifier): bool
     {
         foreach ($this->transactions as $transaction) {
-            if (!$transaction->isValid($verifier)) {
+            if (! $transaction->isValid($verifier)) {
                 return false;
             }
         }
 
-        return  true;
+        return true;
     }
 }

@@ -1,7 +1,10 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Pfazzi\Blockchain;
+
+use function microtime;
 
 class Clock
 {

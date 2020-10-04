@@ -1,9 +1,14 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Pfazzi\Blockchain;
 
+use Exception;
 use JsonSerializable;
+
+use function array_key_last;
+use function count;
 
 class Blockchain implements JsonSerializable
 {
@@ -12,16 +17,16 @@ class Blockchain implements JsonSerializable
     private int $difficulty;
     /** @var Transaction[] */
     private array $pendingTransactions = [];
-    private int $miningReward = 100;
+    private int $miningReward          = 100;
     private Clock $clock;
     private HashAlgorithm $hashAlgorithm;
     private SignatureVerifier $signatureVerifier;
 
     public function __construct(int $difficulty, Clock $clock, HashAlgorithm $hashAlgorithm, SignatureVerifier $signatureVerifier)
     {
-        $this->difficulty = $difficulty;
-        $this->clock = $clock;
-        $this->hashAlgorithm = $hashAlgorithm;
+        $this->difficulty        = $difficulty;
+        $this->clock             = $clock;
+        $this->hashAlgorithm     = $hashAlgorithm;
         $this->signatureVerifier = $signatureVerifier;
 
         $this->chain = [$this->createGenesisBlock()];
@@ -37,7 +42,7 @@ class Blockchain implements JsonSerializable
         $lastIndex = array_key_last($this->chain);
 
         if ($lastIndex === null) {
-            throw new \Exception('Empty chain');
+            throw new Exception('Empty chain');
         }
 
         return $this->chain[$lastIndex];
@@ -48,18 +53,18 @@ class Blockchain implements JsonSerializable
         $block = new Block($this->hashAlgorithm, $this->clock->timestamp(), $this->pendingTransactions, $this->latestBlock()->hash());
         $block->mineBlock($this->hashAlgorithm, $this->difficulty);
 
-        $this->chain[] = $block;
+        $this->chain[]             = $block;
         $this->pendingTransactions = [new Transaction(null, $miningRewardAddress, $this->miningReward)];
     }
 
     public function addTransaction(Transaction $transaction): void
     {
         if ($transaction->from() === null || $transaction->to() === null) {
-            throw new \Exception('Transaction must include from and to address');
+            throw new Exception('Transaction must include from and to address');
         }
 
-        if (!$transaction->isValid($this->signatureVerifier)) {
-            throw new \Exception('Cannot add an invalid transaction to the chain');
+        if (! $transaction->isValid($this->signatureVerifier)) {
+            throw new Exception('Cannot add an invalid transaction to the chain');
         }
 
         $this->pendingTransactions[] = $transaction;
@@ -74,9 +79,12 @@ class Blockchain implements JsonSerializable
                 if ($transaction->from() === $address) {
                     $balance -= $transaction->amount();
                 }
-                if ($transaction->to() === $address) {
-                    $balance += $transaction->amount();
+
+                if ($transaction->to() !== $address) {
+                    continue;
                 }
+
+                $balance += $transaction->amount();
             }
         }
 
@@ -87,9 +95,9 @@ class Blockchain implements JsonSerializable
     {
         for ($index = 1; $index < count($this->chain); $index++) {
             $previousBlock = $this->chain[$index - 1];
-            $currentBlock = $this->chain[$index];
+            $currentBlock  = $this->chain[$index];
 
-            if (!$currentBlock->hasValidTransactions($this->signatureVerifier)) {
+            if (! $currentBlock->hasValidTransactions($this->signatureVerifier)) {
                 return false;
             }
 
@@ -108,7 +116,7 @@ class Blockchain implements JsonSerializable
     public function jsonSerialize()
     {
         return [
-            'chain' => $this->chain
+            'chain' => $this->chain,
         ];
     }
 }
